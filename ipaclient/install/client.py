@@ -3321,6 +3321,11 @@ def _install(options, tdict):
 def uninstall_check(options):
     if not is_ipa_client_configured():
         if options.on_master:
+            # Partial/failed server install can leave artifacts like
+            # /etc/ipa/ca.crt even though the client was never fully
+            # configured. Clean those up before reporting success.
+            if os.path.exists(paths.IPA_CA_CRT):
+                ipautil.remove_file(paths.IPA_CA_CRT)
             rval = SUCCESS
         else:
             rval = CLIENT_NOT_CONFIGURED
